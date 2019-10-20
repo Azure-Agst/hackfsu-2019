@@ -1,5 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TextInput, Button, AsyncStorage } from 'react-native';
+import { Updates } from 'expo';
+
+
+const enableTestAccount = true
 
 //Once again, for sizing
 const {height, width} = Dimensions.get('window')
@@ -26,6 +30,19 @@ export default class Signup extends React.Component{
     handleSubmit(){
         // TODO: post request
         alert(`User: ${this.state.user}\nPassword: ${this.state.pass}`)
+    }
+
+    async testLogin(){
+        const { navigate } = this.props.navigation;
+        await AsyncStorage.setItem('@FSUCoin:userData', JSON.stringify({
+            "user": "TestUser1",
+            "name": "John Appleseed",
+            "address": "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7",
+            "value": 1500
+        }));
+        await AsyncStorage.setItem("@FSUCoin:pendingVal", "25");
+        Updates.reloadFromCache();
+        //navigate("Home");
     }
 
     render(){
@@ -58,6 +75,15 @@ export default class Signup extends React.Component{
                         style={{color:"white", textAlign:"center"}}
                         onPress={() => goBack()}
                     >Have an account already? Log in here!</Text>
+                    {enableTestAccount && (
+                        <>
+                            <View style={{height: 30}}/>
+                            <Text
+                                style={{color:"white", textAlign:"center"}}
+                                onPress={() => this.testLogin()}
+                            >Secret!</Text>
+                        </>
+                    )}
                 </View>
                 <View style={{flex: 3}}/>
             </View>

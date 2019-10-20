@@ -10,7 +10,7 @@ const {height, width} = Dimensions.get('window')
 
 export class Recieve extends React.Component {
     static navigationOptions = {
-        title: 'Recieve',
+        title: 'Receive',
         headerStyle: {backgroundColor: "#CEB888"}
     };
 
@@ -34,7 +34,7 @@ export class Recieve extends React.Component {
             // Hack to not wrap in another view
             <View style={{flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: bkgColor, }}>
                 <View style={{flex:1, backgroundColor:bkgColor, justifyContent: "center", alignItems: "center",}}>
-                    <Text style={{color:"white", fontWeight: "bold", fontSize: 32,}}>Recieve</Text>
+                    <Text style={{color:"white", fontWeight: "bold", fontSize: 32,}}>Receive</Text>
                 </View>
                 <View style={{flex: 2, alignItems: "center",}}>
                     <Text style={{color:"white",marginBottom:20,}}>Show this to who you want to recieve credits from!</Text>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button, TextInput,
-        Dimensions, BackHandler, ActivityIndicator } from 'react-native';
+        Dimensions, BackHandler, ActivityIndicator, AsyncStorage } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 
@@ -23,7 +23,9 @@ export class ConfirmTrans extends React.Component {
     }
 
     handleTapYes() {
-        alert('Points Sent!');
+        const { value, addr } = this.props.navigation.state.params;
+        alert(`${value} Points Sent!`);
+        AsyncStorage.setItem("@FSUCoin:pendingVal", value.toString())
         this.props.navigation.goBack();
     }
     

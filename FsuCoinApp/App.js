@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Dimensions, ScrollView, Image, View } from 'react-native';
+import { StyleSheet, Dimensions, ScrollView, Image, View, AsyncStorage } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createDrawerNavigator, DrawerNavigatorItems } from 'react-navigation-drawer';
 import SafeAreaView from 'react-native-safe-area-view';

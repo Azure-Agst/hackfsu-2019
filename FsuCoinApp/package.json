@@ -22,6 +22,7 @@
     "react-native-qrcode": "^0.2.7",
     "react-native-qrcode-scanner": "^1.2.3",
     "react-native-reanimated": "~1.2.0",
+    "react-native-restart": "0.0.13",
     "react-native-screens": "~1.0.0-alpha.23",
     "react-native-vector-icons": "^6.6.0",
     "react-native-web": "^0.11.7",
