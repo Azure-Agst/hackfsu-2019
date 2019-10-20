@@ -1,69 +1,48 @@
-"""
-Author: Christopher Holder
-eth.py - Manages the connections between the Ethereum Node and the program through
-a Web3py wrapper.
-"""
 import os
 import time
-import sqlite3
 import pickle
 import datetime
-import logging
-import exc
+import logging 
+import exc 
+import pprint
+import json
+import sqlite3
 
-from abc import ABC
 from solc import compile_source
-from web3 import Web3,HTTPProvider,IPCProvider,middleware
+from web3 import Web3, HTTPProvider, IPCProvider, middleware
 from web3.middleware import geth_poa_middleware
-from hash import Key,byte32,hashStr
+from hash import Key, byte32, hashStr
+from web3.auto import w3
+from eth_account import Account
 
-
-cwd = os.getcwd().split('/')
-cwd.pop()
-cwd.append('res')
-cwd.append('solidity')
-cwd.append('')
-solpath = '/'.join(cwd)
-netIds = {'main':1,'morden':2,'ropsten':3,'rinkeby':4,'kovan':42,'sokol':77,'core':99}
-
-
-#TODO: Time in between waiting for server to response.
-#TODO: Provide richer information when returning.
-
-class Connection(ABC):
+keypath = '/home/Development/.ethereum/rinkeby/keystore/2019-10-20 04:37:11.809546'
+netIds = {'main':1,'morden':2,'ropsten':3,'rinkeby':4,'kovan':42,'sokol':77,'core':99} 
+solpath = '/home/Development/hackfsu-2019/API/'
+class NoleCon():
     '''
     Base class for the different type of connections with the Ethereum network.
     Not meant to be instantiated by itself.
     '''
-    def __init__(self, type, network):
-        self.type = type
+    def __init__(self, network):
         self.network = network
         self.running = False
         self.lock = True
         self.key = Key()
-        self.conn = sqlite3.connect('../res/nim.db')
+        self.conn = sqlite3.connect('../../res/nim.db')
         self.c = self.conn.cursor()
         self.c.execute('CREATE TABLE IF NOT EXISTS Deployed (address STRING UNIQUE,filename STRING,contractObj BLOB,dat datetime)')
         self.conn.commit()
 
     def __call__(self, *args, **kwargs):
         try:
-            if self.type == 'infura':
-                self.web3 = Web3(HTTPProvider('https://' + self.network + '.infura.io/v3/' + self.token))
-                if self.network == 'rinkeby':
-                    self.web3.middleware_stack.inject(geth_poa_middleware, layer=0)
-            elif self.type == 'local' or self.type =='ipc':
-                #Default location for geth.
-                self.web3 = Web3(IPCProvider())
+            self.web3 = w3
             self.time = time.asctime(time.localtime())
         except Exception as e:
             print(e + ' ' + str(type(e)))
             raise exc.Connection('__call__')
         else:
-            #print('...Connection established with the ' + self.network + ' Ethereum network')
-            print('...Connection established with the ' + self.network + ' Ethereum network')
             if self.web3.isConnected():
-                #print('...Active connection at : ' + self.time)
+                print('...Connection established with the ' + self.network + ' Ethereum network')
                 print('...Active connection at : ' + self.time)
                 self.running = True
                 return True
@@ -82,11 +61,11 @@ class Connection(ABC):
     def isRunning(self):
         return self.running
 
-    def loadKey(self,path):
+    def loadKey(self, path):
         self.web3.eth.enable_unaudited_features()
         self.key.load(path)
 
-    def decryptKey(self,path,passphrase):
+    def decryptKey(self, path, passphrase):
         '''
         :param path: Path to json keyfile.
         :param passphrase: Decrypts keyfile.
@@ -106,11 +85,15 @@ class Connection(ABC):
         :return: Transaction Receipt.
         '''
         while True:
-            tx_receipt = self.web3.eth.getTransactionReceipt(tx_hash)
-            if tx_receipt:
+            try:
+                tx_receipt = self.web3.eth.getTransactionReceipt(tx_hash)
+            except:
+                print('...Pending Transaction')
+            else:
                 print('...Transaction mined.')
+                print('...Receipt: {}'.format(str(tx_receipt)))
                 return tx_receipt
-            print('...Pending Transaction')
+            
             time.sleep(poll_interval)
 
     def signStr(self,s):
@@ -119,16 +102,16 @@ class Connection(ABC):
         :return: Signature object of s
         '''
         #TODO: Review correct hashing.
-        return self.web3.eth.account.signHash(hashStr(s), private_key=self.key.getPrivate())
+        return self.web3.eth.account.signHash(hashStr(s), private_key = self.key.getPrivate())
 
-    def signHash(self,msgHash):
+    def signHash(self, msgHash):
         '''
         :param msgHash:
         :return: Signature object of the message hash.
         '''
         return self.web3.eth.account.signHash(msgHash, private_key=self.key.getPrivate())
 
-    def whoSign(self,msgHash,signature):
+    def whoSign(self, msgHash, signature):
         '''
         :param msgHash: Hashed message.
         :param signature: Hex String or Hex Bytes
@@ -136,29 +119,15 @@ class Connection(ABC):
         '''
         return self.web3.eth.account.recoverHash(msgHash, signature=signature)
 
-    def getBalance(self):
-        return self.web3.fromWei(self.web3.eth.getBalance(self.address), 'ether')
+    def getBalance(self, address):
+        address = Web3.toChecksumAddress(address)
+        return self.web3.fromWei(self.web3.eth.getBalance(address), 'ether')
 
-    def searchContract(self,filename):
-        '''
-
-        :param filename: name of the solidity filename.(String)
-        :return:
-        '''
-        self.c.execute('SELECT address FROM Deployed WHERE filename = ? ORDER BY dat DESC',(filename,))
-        data = self.c.fetchone()
-        if data == None:
-            raise exc.ContractNotDeployed('searchContract(' + filename+')')
-        return data[0]
-
-class Infura(Connection):
-    '''
-    Child class to connection, customized for interaction with Infura nodes.
-    '''
-    def __init__(self,network,token):
-        Connection.__init__(self,'infura', network)
-        self.token = token
-
+    def createAccount(self, passphrase, seed):
+        acc = Account.create(seed)
+        enc = Account.encrypt(acc._private_key, passphrase)
+        with open('/home/Development/.ethereum/rinkeby/keystore/{}'.format(datetime.datetime.now()), 'w') as f:
+                  f.write(json.dumps(enc))
     def send(self, to, value, price=6):
         '''
         :param to: Hex string of payment receiver.
@@ -169,6 +138,7 @@ class Infura(Connection):
         # Gas estimation also depends on the specified ethereum network
 
         nonce = self.web3.eth.getTransactionCount(self.key.address)
+        print('nonce: {}'.format(nonce))
         gas = self.web3.eth.estimateGas({'to': to, 'from': self.key.address, 'value': Web3.toWei(value, 'ether')})
         trans = {'to': to,'value': Web3.toWei(value, 'ether'),
                 'gas': gas,'gasPrice': Web3.toWei(price, 'gwei'),
@@ -181,9 +151,18 @@ class Infura(Connection):
         except Exception as e:
             print(e + ' ' + str(type(e)))
         else:
-            return self.wait_for_receipt(byte32(txnHash), 10)
+            return self.wait_for_receipt(byte32(txnHash), 5)
+    def searchContract(self,filename):
+        '''
 
-
+        :param filename: name of the solidity filename.(String)
+        :return:
+        '''
+        self.c.execute('SELECT address FROM Deployed WHERE filename = ? ORDER BY dat DESC',(filename,))
+        data = self.c.fetchone()
+        if data == None:
+            raise exc.ContractNotDeployed('searchContract(' + filename+')')
+        return data[0]
     def deploy(self, path, *arg, price=4, value=0):
         '''
         Deploys a solidity source file and returns the address of the contract.
@@ -217,16 +196,14 @@ class Infura(Connection):
             txnHash = self.web3.eth.sendRawTransaction(signObj.rawTransaction)
         except ValueError as e:
             print(type(e.args[0]))
-
         txnHash = byte32(txnHash)
-
         address = self.wait_for_receipt(txnHash, 10)['contractAddress']
-
         entry = (address, solname, blob,datetime.datetime.now())
         self.c.execute('INSERT INTO Deployed(address,filename,contractObj,dat) VALUES (?,?,?,?)', entry)
         self.conn.commit()
-        return address
 
+        return address
+    
     def call(self, contractAddress, methodName, *arg, price=4, value=0):
         '''
         Broadcasts a method call transaction to the network.
@@ -262,15 +239,23 @@ class Infura(Connection):
                          'nonce': nonce, 'chainId': netIds[self.network],'from':self.address,'gas':90000}
                 txn = func(*arg).buildTransaction(trans)
 
-
             except ValueError as e:
-                raise exc.TransactionBuild('Infura.call()')
+                print(type(e.args[0]))
+                
             else:
                 print('Cost of method calling : ' + str(self.web3.fromWei(txn['gasPrice'] * txn['gas'] + txn['value'], 'ether')) + ' ETH')
                 signObj = self.web3.eth.account.signTransaction(txn, self.key.getPrivate())
                 txnHash = byte32(self.web3.eth.sendRawTransaction(signObj.rawTransaction))
-                return (func(*arg).call(), self.wait_for_receipt(txnHash, 10))
+                return (func(*arg).call(), self.wait_for_receipt(txnHash, 5))
 
+#con  = NoleCon('rinkeby')
+#con.run()
+#con.createAccount('1234','1234')
+#con.decryptKey(keypath, '1234')
+#print(con.getBalance(con.address))
+#con.deploy('sc.sol', 100, 'NoleCoin', 'FSU')
+#con.call('0xCD91CDa63897C0c761A2cd07e45B4bd4728AfE2D', 'mint', '0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 20)
 
-
+#con.send('0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 0.1)
+#print(con.getBalance('0x4903B22e7c28D370d09917cCE6e769009dCeD0F4'))
 
