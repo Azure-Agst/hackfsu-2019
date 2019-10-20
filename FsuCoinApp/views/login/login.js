@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Dimensions, TextInput, Button, AsyncStorage } from 'react-native';
 import { Updates } from 'expo';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import * as SecureStore from 'expo-secure-store';
 
 //Once again, for sizing
 const {height, width} = Dimensions.get('window')
@@ -25,7 +26,7 @@ export default class Login extends React.Component{
     }
 
     async componentDidMount(){
-        const value = await AsyncStorage.getItem('@FSUCoin:userData');
+        const value = await SecureStore.getItemAsync('FSUCoin_userData');
         this.setState({dataLoaded: true, userStore: JSON.parse(value)})
     }
 
@@ -49,7 +50,8 @@ export default class Login extends React.Component{
 
     async handleLogout() {
         const { navigate } = this.props.navigation;
-        await AsyncStorage.removeItem("@FSUCoin:userData");
+        await SecureStore.deleteItemAsync("FSUCoin_userData");
+        await SecureStore.deleteItemAsync("FSUCoin_pendingVal");
         Updates.reloadFromCache();
         navigate('Home');
     }

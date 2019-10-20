@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, Dimensions, TextInput, Button, AsyncStorage } from 'react-native';
 import { Updates } from 'expo';
+import * as SecureStore from 'expo-secure-store';
 
 
 const enableTestAccount = true
@@ -34,13 +35,13 @@ export default class Signup extends React.Component{
 
     async testLogin(){
         const { navigate } = this.props.navigation;
-        await AsyncStorage.setItem('@FSUCoin:userData', JSON.stringify({
+        SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify({
             "user": "TestUser1",
             "name": "John Appleseed",
             "address": "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7",
             "value": 1500
         }));
-        await AsyncStorage.setItem("@FSUCoin:pendingVal", "25");
+        SecureStore.setItemAsync("FSUCoin_pendingVal", "25");
         Updates.reloadFromCache();
         //navigate("Home");
     }

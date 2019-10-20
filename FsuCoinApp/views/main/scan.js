@@ -28,6 +28,10 @@ export class Scan extends React.Component {
         //value
         const { value } = this.props.navigation.state.params;
         this.setState({value: value})
+
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.setState({ scanned: false });
+        });
     }
 
     componentWillUnmount() {
@@ -42,8 +46,8 @@ export class Scan extends React.Component {
     handleBarCodeScanned = ({ type, data }) => {
         this.setState({ scanned: true });
         const { navigate } = this.props.navigation;
-        navigate('Confirm', { value: this.state.value, addr: data})
-        this.setState({ scanned: false });
+        const { refreshMain, curPend } = this.props.navigation.state.params;
+        navigate('Confirm', { value: this.state.value, addr: data, refreshMain: refreshMain})
     };
 
     handleValueChange = (value) => {
@@ -83,9 +87,9 @@ export class Scan extends React.Component {
                             <View style={{flex: 1, backgroundColor:bkgColor}} />
                         </View>
                         <View style={{flex:1, backgroundColor:bkgColor, justifyContent: "center", alignItems: "center",}}>
-                            {scanned && (
+                            {/* {scanned && (
                                 <Button title={'Tap to Scan Again'} onPress={() => this.setState({ scanned: false })} />
-                            )}
+                            )} */}
                         </View>
                         <View style={{flex:1, backgroundColor:"#CEB888", justifyContent: "center", alignItems: "center", borderTopColor: "#2C2A29", borderTopWidth: 4,}}>
                             <Text style={{justifyContent: 'flex-start', fontWeight: 'bold', fontSize: 32, color: "#782F40"}} onPress={() => goBack()}>Back</Text>

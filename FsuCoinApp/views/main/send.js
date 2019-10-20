@@ -38,6 +38,7 @@ export class Send extends React.Component {
 
     renderCamera() {
     const { goBack, navigate } = this.props.navigation;
+    const { refreshMain, curPend } = this.props.navigation.state.params;
         return(
             // Hack to not wrap in another view
             <>  
@@ -55,7 +56,7 @@ export class Send extends React.Component {
                 </View>
                 <View style={styles.transfer}>
                     <View style={styles.transButton}>
-                        <Text style={styles.send} onPress={() => navigate('Scan', {value: this.state.value})}>Continue</Text>
+                        <Text style={styles.send} onPress={() => navigate('Scan', {value: this.state.value, refreshMain: refreshMain})}>Continue</Text>
                     </View>
                     <View style={styles.divider}/>
                     <View style={styles.transButton}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Dimensions, 
     Image, AsyncStorage, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import * as SecureStore from 'expo-secure-store';
 
 // Constants
 const exampleName = "Andrew Augustine"
@@ -10,6 +11,11 @@ const exampleAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
 const exampleValue = 1500
 
 export class Home extends React.Component {
+    constructor(props){
+        super(props);
+        this.refresh = this.refresh.bind(this);
+    }
+
     static navigationOptions = ({navigation}) => {
         return {
             title: 'Home',
@@ -27,18 +33,22 @@ export class Home extends React.Component {
     }
 
     async componentDidMount(){
-        const value = await AsyncStorage.getItem('@FSUCoin:userData');
-        const pending = await AsyncStorage.getItem("@FSUCoin:pendingVal");
+        const value = await SecureStore.getItemAsync('FSUCoin_userData');
+        const pending = await SecureStore.getItemAsync("FSUCoin_pendingVal");
         this.setState({
             dataLoaded: true, 
             userStore: JSON.parse(value), 
             pending: pending,
         })
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.refresh();
+        });
     }
 
-    refreshMain() {
+    refresh() {
         // Force a render without state change...
         this.forceUpdate();
+        //this.setState({ state: this.state });
     }
 
     renderPage(){
@@ -62,7 +72,7 @@ export class Home extends React.Component {
                     </View>
                     <View style={styles.transfer}>
                         <View style={styles.transButton}>
-                            <Text style={styles.send} onPress={() => navigate('Send')}>Send</Text>
+                            <Text style={styles.send} onPress={() => navigate('Send', {refreshMain: this.refresh, curPend: pending})}>Send</Text>
                         </View>
                         <View style={styles.divider}/>
                         <View style={styles.transButton}>
