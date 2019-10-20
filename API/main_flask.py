@@ -93,7 +93,8 @@ def transfer():
     destination = request.form['address']
     value = request.form['value']
     thisUser =  db.search(where('token') == userToken)
-    api.transferFrom(thisUser[0]['address'], destination, value)
+    print(thisUser[0]['address'], destination, int(value))
+    api.transferFrom(thisUser[0]['address'], destination, int(value))
     # use userToken and destination to transfer coin here
 
     return {

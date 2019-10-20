@@ -43,15 +43,11 @@ contract BaseERC20Token {
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) public returns (bool success)
-    {
+    function transferFrom(address from, address to, uint256 value) public {
         require(value <= balanceOf[from]);
-        require(value <= allowance[from][msg.sender]);
         balanceOf[from] -= value;
         balanceOf[to] += value;
-        allowance[from][msg.sender] -= value;
         emit Transfer(from, to, value);
-        return true;
     }
     
     function mint(address recipient, uint256 amount) public {
