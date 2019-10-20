@@ -61,4 +61,7 @@ contract BaseERC20Token {
         balanceOf[recipient] += amount;
         emit Transfer(address(0), recipient, amount);
     }
+    function getBalanceOf(address account) public view returns (uint256) {
+        return balanceOf[account];
+    }
 }

@@ -18,6 +18,8 @@ from eth_account import Account
 keypath = '/home/Development/.ethereum/rinkeby/keystore/2019-10-20 04:37:11.809546'
 netIds = {'main':1,'morden':2,'ropsten':3,'rinkeby':4,'kovan':42,'sokol':77,'core':99} 
 solpath = '/home/Development/hackfsu-2019/API/'
+contract_address = '0x4974Ce7F7534BdaA070257D1fbd4634f6Cb86829'
+
 class NoleCon():
     '''
     Base class for the different type of connections with the Ethereum network.
@@ -28,7 +30,7 @@ class NoleCon():
         self.running = False
         self.lock = True
         self.key = Key()
-        self.conn = sqlite3.connect('../../res/nim.db')
+        self.conn = sqlite3.connect('../../res/nim.db', check_same_thread = False)
         self.c = self.conn.cursor()
         self.c.execute('CREATE TABLE IF NOT EXISTS Deployed (address STRING UNIQUE,filename STRING,contractObj BLOB,dat datetime)')
         self.conn.commit()
@@ -126,8 +128,9 @@ class NoleCon():
     def createAccount(self, passphrase, seed):
         acc = Account.create(seed)
         enc = Account.encrypt(acc._private_key, passphrase)
-        with open('/home/Development/.ethereum/rinkeby/keystore/{}'.format(datetime.datetime.now()), 'w') as f:
+        with open('/home/Development/.ethereum/rinkeby/keystore/{}'.format(acc.address), 'w') as f:
                   f.write(json.dumps(enc))
+        return acc.address
     def send(self, to, value, price=6):
         '''
         :param to: Hex string of payment receiver.
@@ -203,7 +206,7 @@ class NoleCon():
         self.conn.commit()
 
         return address
-    
+
     def call(self, contractAddress, methodName, *arg, price=4, value=0):
         '''
         Broadcasts a method call transaction to the network.
@@ -248,13 +251,26 @@ class NoleCon():
                 txnHash = byte32(self.web3.eth.sendRawTransaction(signObj.rawTransaction))
                 return (func(*arg).call(), self.wait_for_receipt(txnHash, 5))
 
+    def getTokenBalance(self, who):
+        self.c.execute('SELECT contractObj FROM Deployed WHERE address = ?', (contract_address,))                                                                               
+        data = self.c.fetchone()                                                                                                                                               
+        if data == None:                                                                                                                                                       
+            raise exc.ContractNotDeployed('Infura.call()')                                                                                                                     
+        interface = pickle.loads(data[0])                                                                                                                                      
+        contract = self.web3.eth.contract(abi=interface['abi'], bytecode=interface['bin'], address=contract_address)
+        return contract.functions.getBalanceOf(who).call()
+
+        
 #con  = NoleCon('rinkeby')
 #con.run()
 #con.createAccount('1234','1234')
 #con.decryptKey(keypath, '1234')
 #print(con.getBalance(con.address))
-#con.deploy('sc.sol', 100, 'NoleCoin', 'FSU')
-#con.call('0xCD91CDa63897C0c761A2cd07e45B4bd4728AfE2D', 'mint', '0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 20)
+#address = con.deploy('sc.sol', 1000, 'NoleCoin', 'FSUCoin')
+#print("Contract Address: " + address)
+#print(con.getTokenBalance('0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C'))
+
+#con.call(contract_address, 'mint', '0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 20)
 
 #con.send('0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 0.1)
 #print(con.getBalance('0x4903B22e7c28D370d09917cCE6e769009dCeD0F4'))
