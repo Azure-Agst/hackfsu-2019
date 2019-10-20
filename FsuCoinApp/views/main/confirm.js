@@ -19,16 +19,16 @@ export class ConfirmTrans extends React.Component {
 
     componentDidMount() {
         this.backHandler = BackHandler.addEventListener('hardwareBackPress', this.goBack);
-        try {
-            SecureStore.getItemAsync("FSUCoin_pendingVal").then((value) => {
-                this.setState({curVal: value})
-            }).catch((error) => {
-                console.warn(error)
-            });
-        } catch (error) {
-            console.warn(error)
-            item = null
-        }
+        // try {
+        //     SecureStore.getItemAsync("FSUCoin_pendingVal").then((value) => {
+        //         this.setState({curVal: value})
+        //     }).catch((error) => {
+        //         console.warn(error)
+        //     });
+        // } catch (error) {
+        //     console.warn(error)
+        //     item = null
+        // }
     }
 
     goBack() {
@@ -37,7 +37,7 @@ export class ConfirmTrans extends React.Component {
 
     handleTapYes() {
         const { value } = this.props.navigation.state.params;
-        SecureStore.setItemAsync('FSUCoin_pendingVal', (+this.state.curVal + +value).toString())
+        //SecureStore.setItemAsync('FSUCoin_pendingVal', (+this.state.curVal + +value).toString())
         alert(`${value} Points Sent!`);
         this.props.navigation.state.params.refreshMain();
         this.goBack();

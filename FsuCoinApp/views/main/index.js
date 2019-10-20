@@ -33,13 +33,23 @@ export class Home extends React.Component {
     }
 
     async componentDidMount(){
-        const value = await SecureStore.getItemAsync('FSUCoin_userData');
-        const pending = await SecureStore.getItemAsync("FSUCoin_pendingVal");
-        this.setState({
-            dataLoaded: true, 
-            userStore: JSON.parse(value), 
-            pending: pending,
+        fetch('https://s3.azureagst.dev/userdata.json')
+        .then((response) => response.json())
+        .then((responseJson) => {
+            SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify(responseJson));
+            this.setState({
+                dataLoaded: true, 
+                userStore: responseJson, 
+                //pending: pending,
+            })
         })
+        
+        //const pending = await SecureStore.getItemAsync("FSUCoin_pendingVal");
+        // this.setState({
+        //     dataLoaded: true, 
+        //     userStore: userdata, 
+        //     //pending: pending,
+        // })
         this.focusListener = this.props.navigation.addListener('didFocus', () => {
             this.refresh();
         });
@@ -53,7 +63,7 @@ export class Home extends React.Component {
 
     renderPage(){
         const { navigate } = this.props.navigation;
-        const {dataLoaded, userStore, pending} = this.state;
+        const {dataLoaded, userStore, /*pending*/} = this.state;
         if (dataLoaded && userStore !== null){
             // user data exists
             return(
@@ -65,14 +75,14 @@ export class Home extends React.Component {
                         <Text style={styles.name}>{userStore.name}</Text>
                         <Text style={styles.fsuid}>Username: {userStore.user}</Text>
                         <Text style={styles.spacer} />
-                        <Text style={styles.address}>{userStore.value - +pending} Points</Text>
-                        {pending && (
+                        <Text style={styles.address}>{userStore.value /* - +pending*/} Points</Text>
+                        {/*pending && (
                             <Text style={styles.fsuid}>[ -{pending} Pending ]</Text>
-                        )}
+                        )*/}
                     </View>
                     <View style={styles.transfer}>
                         <View style={styles.transButton}>
-                            <Text style={styles.send} onPress={() => navigate('Send', {refreshMain: this.refresh, curPend: pending})}>Send</Text>
+                            <Text style={styles.send} onPress={() => navigate('Send', {refreshMain: this.refresh, /*curPend: pending*/})}>Send</Text>
                         </View>
                         <View style={styles.divider}/>
                         <View style={styles.transButton}>

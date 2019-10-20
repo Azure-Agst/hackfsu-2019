@@ -51,7 +51,7 @@ export default class Login extends React.Component{
     async handleLogout() {
         const { navigate } = this.props.navigation;
         await SecureStore.deleteItemAsync("FSUCoin_userData");
-        await SecureStore.deleteItemAsync("FSUCoin_pendingVal");
+        //await SecureStore.deleteItemAsync("FSUCoin_pendingVal");
         Updates.reloadFromCache();
         navigate('Home');
     }

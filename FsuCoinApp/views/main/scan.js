@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, TextInput,
+import { StyleSheet, Text, View, Button, Alert,
         Dimensions, BackHandler, ActivityIndicator } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
@@ -9,6 +9,11 @@ import { Camera } from 'expo-camera';
 const bkgColor = '#782F40';
 
 export class Scan extends React.Component {
+    constructor(props){
+        super(props);
+        this.resetScanState = this.resetScanState.bind(this);
+    }
+
     static navigationOptions = {
         title: 'Send',
         headerStyle: {backgroundColor: "#CEB888"}
@@ -43,11 +48,26 @@ export class Scan extends React.Component {
         navigate('Home');
     }
 
+    resetScanState(){
+        this.setState({ scanned: false })
+    }
+
     handleBarCodeScanned = ({ type, data }) => {
         this.setState({ scanned: true });
         const { navigate } = this.props.navigation;
         const { refreshMain, curPend } = this.props.navigation.state.params;
-        navigate('Confirm', { value: this.state.value, addr: data, refreshMain: refreshMain})
+        if (data.startsWith("0x") == false || data.length != 42){
+            Alert.alert(
+                "Error",
+                "Invalid Code Scanned",
+                [
+                    { text: "OK", onPress: this.resetScanState},
+                ],
+                { cancelable: false }
+            );
+        } else {
+            navigate('Confirm', { value: this.state.value, addr: data, refreshMain: refreshMain})
+        }
     };
 
     handleValueChange = (value) => {

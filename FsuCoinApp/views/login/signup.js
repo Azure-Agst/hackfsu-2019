@@ -41,7 +41,7 @@ export default class Signup extends React.Component{
             "address": "0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7",
             "value": 1500
         }));
-        SecureStore.setItemAsync("FSUCoin_pendingVal", "25");
+        //SecureStore.setItemAsync("FSUCoin_pendingVal", "25");
         Updates.reloadFromCache();
         //navigate("Home");
     }
