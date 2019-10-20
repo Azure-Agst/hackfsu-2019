@@ -2,27 +2,37 @@ import React from 'react';
 import { StyleSheet, Text, View, Dimensions, Image } from 'react-native';
 import { requireNativeViewManager } from '@unimodules/core';
 
-// Constant
+// Constants
+const exampleName = "Andrew Augustine"
+const exampleFSUID = "aea19h"
 const exampleAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
 
 export class Home extends React.Component {
+    static navigationOptions = {
+        title: 'Home',
+        headerStyle: {backgroundColor: "#CEB888"}
+    };
+
     render(){
+        const { navigate } = this.props.navigation;
         return(
             <View style={styles.main}>  
                 <View>
                     <Image style={styles.logo} source={require('../../assets/FSU_Seal_500x500.png')} />
                 </View>
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: height/15, justifyContent: "flex-start" }}>
-                    <Text style={styles.name}>Name</Text>
+                    <Text style={styles.name}>{exampleName}</Text>
+                    <Text style={styles.fsuid}>FSUID: {exampleFSUID}</Text>
+                    <Text style={styles.spacer} />
                     <Text style={styles.address}>{exampleAddress}</Text>
                 </View>
                 <View style={styles.transfer}>
                     <View style={styles.transButton}>
-                        <Text style={styles.send}>Send</Text>
+                        <Text style={styles.send} onPress={() => navigate('Send')}>Send</Text>
                     </View>
                     <View style={styles.divider}/>
                     <View style={styles.transButton}>
-                        <Text style={styles.recieve}>Recieve</Text>
+                        <Text style={styles.recieve} onPress={() => navigate('Recieve', {addr: exampleAddress})}>Recieve</Text>
                     </View>
                 </View>
             </View>  
@@ -52,6 +62,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 32,
         color: "#fff"
+    },
+    fsuid: {
+        //fontWeight: '',
+        fontSize: 18,
+        color: "#fff"
+    },
+    spacer: {
+        height: 20,
     },
     address: {
         fontWeight: 'bold',
