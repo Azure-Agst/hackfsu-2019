@@ -5,12 +5,13 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import * as SecureStore from 'expo-secure-store';
 
 // Constants
-const exampleName = "Andrew Augustine"
-const exampleFSUID = "aea19h"
-const exampleAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
-const exampleValue = 1500
+// const exampleName = "Andrew Augustine"
+// const exampleFSUID = "aea19h"
+// const exampleAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
+// const exampleValue = 1500
 
 export class Home extends React.Component {
+    // fsucoin-api.azureagst.dev/getCurUser
     constructor(props){
         super(props);
         this.refresh = this.refresh.bind(this);
@@ -33,10 +34,18 @@ export class Home extends React.Component {
     }
 
     async componentDidMount(){
-        fetch('https://s3.azureagst.dev/userdata.json')
+        const cookie = await SecureStore.getItemAsync('FSUCoin_cookie')
+        fetch('http://fsucoin-api.azureagst.dev/getCurUser', {
+            headers: {
+                "cookie": cookie
+            }
+        })
         .then((response) => response.json())
         .then((responseJson) => {
-            SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify(responseJson));
+            console.log(responseJson)
+            if (!"error" in responseJson){
+                SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify(responseJson));
+            }
             this.setState({
                 dataLoaded: true, 
                 userStore: responseJson, 
@@ -53,6 +62,10 @@ export class Home extends React.Component {
         this.focusListener = this.props.navigation.addListener('didFocus', () => {
             this.refresh();
         });
+
+        setInterval(() => {
+            this.forceUpdate();
+        }, 30000);
     }
 
     refresh() {
@@ -64,7 +77,7 @@ export class Home extends React.Component {
     renderPage(){
         const { navigate } = this.props.navigation;
         const {dataLoaded, userStore, /*pending*/} = this.state;
-        if (dataLoaded && userStore !== null){
+        if (dataLoaded && !("error" in userStore)){
             // user data exists
             return(
                 <View style={styles.main}>  
@@ -73,7 +86,7 @@ export class Home extends React.Component {
                     </View>
                     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: height/15, justifyContent: "flex-start" }}>
                         <Text style={styles.name}>{userStore.name}</Text>
-                        <Text style={styles.fsuid}>Username: {userStore.user}</Text>
+                        <Text style={styles.fsuid}>Username: {userStore.username}</Text>
                         <Text style={styles.spacer} />
                         <Text style={styles.address}>{userStore.value /* - +pending*/} Points</Text>
                         {/*pending && (
@@ -86,12 +99,12 @@ export class Home extends React.Component {
                         </View>
                         <View style={styles.divider}/>
                         <View style={styles.transButton}>
-                            <Text style={styles.recieve} onPress={() => navigate('Recieve', {addr: userStore.addr})}>Receive</Text>
+                            <Text style={styles.recieve} onPress={() => navigate('Recieve', {addr: userStore.address})}>Receive</Text>
                         </View>
                     </View>
                 </View>  
             )
-        } else if (dataLoaded && userStore === null) {
+        } else if (dataLoaded && "error" in userStore) {
             return(
                 // Not Logged in
                 <View style={styles.main}>  

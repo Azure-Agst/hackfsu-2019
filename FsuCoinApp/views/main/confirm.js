@@ -14,6 +14,7 @@ export class ConfirmTrans extends React.Component {
     };
 
     state = {
+        thinking: false,
         curVal: null,
     }
 
@@ -29,6 +30,10 @@ export class ConfirmTrans extends React.Component {
         //     console.warn(error)
         //     item = null
         // }
+        SecureStore.getItemAsync('FSUCoin_cookie').then((value) => {
+            this.setState({pushed: true, cookie: value})
+        });
+            
     }
 
     goBack() {
@@ -36,18 +41,35 @@ export class ConfirmTrans extends React.Component {
     }
 
     handleTapYes() {
-        const { value } = this.props.navigation.state.params;
         //SecureStore.setItemAsync('FSUCoin_pendingVal', (+this.state.curVal + +value).toString())
-        alert(`${value} Points Sent!`);
-        this.props.navigation.state.params.refreshMain();
-        this.goBack();
+        this.setState({thinking: true})
+        const { value, addr } = this.props.navigation.state.params;
+        let formdata = new FormData();
+        formdata.append("address", addr)
+        formdata.append("value", value)
+        fetch('http://fsucoin-api.azureagst.dev/transfer', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                Cookie: this.state.cookie
+            },
+            body: formdata
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            this.setState({thinking: false})
+            alert(`${value} Points Sent!`);
+            this.props.navigation.state.params.refreshMain();
+            this.goBack();
+        })
+        
     }
     
     renderConfirm() {
-        const { navigate } = this.props.navigation;
+        const { thinking } = this.state;
         const { value, addr } = this.props.navigation.state.params;
-        console.log(this.state.curVal)
-        if (this.state.curVal === null){
+        console.log(addr)
+        if (thinking){
             return(
                 <View style={{flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: '#782F40'}}>
                     <ActivityIndicator size="large" color="#ffffff" />

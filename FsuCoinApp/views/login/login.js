@@ -8,6 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 const {height, width} = Dimensions.get('window')
 
 export default class Login extends React.Component{
+    // http://fsucoin-api.azureagst.dev/login
     static navigationOptions = ({navigation}) => {
         return {
             title: 'Login',
@@ -28,6 +29,9 @@ export default class Login extends React.Component{
     async componentDidMount(){
         const value = await SecureStore.getItemAsync('FSUCoin_userData');
         this.setState({dataLoaded: true, userStore: JSON.parse(value)})
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.forceUpdate();
+        });
     }
 
     handleChange(varia, value) {
@@ -38,21 +42,46 @@ export default class Login extends React.Component{
         }
     }
 
-    handleSubmit(){
-        // TODO: post request
-        alert(`User: ${this.state.user}\nPassword: ${this.state.pass}`)
-    }
+    // handleSubmit(){
+    //     // TODO: post request
+    //     alert(`User: ${this.state.user}\nPassword: ${this.state.pass}`)
+    // }
 
     refresh() {
         // Force a render without state change...
         this.forceUpdate();
     }
 
+    handleSubmit() {
+        const { navigate } = this.props.navigation;
+        let formdata = new FormData();
+        formdata.append("username", this.state.user)
+        formdata.append("password", this.state.pass)
+        fetch('http://fsucoin-api.azureagst.dev/login', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                //'Content-Type': 'application/json',
+            },
+            body: formdata
+        })
+        .then((response) => {
+            SecureStore.setItemAsync('FSUCoin_cookie', response.headers.get("set-cookie"))
+            return response.json()
+        })
+        .then((responseJson) => {
+            SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify(responseJson));
+            Updates.reload();
+            navigate('Home')
+        })
+    }
+
     async handleLogout() {
         const { navigate } = this.props.navigation;
         await SecureStore.deleteItemAsync("FSUCoin_userData");
+        await SecureStore.deleteItemAsync("FSUCoin_cookie");
         //await SecureStore.deleteItemAsync("FSUCoin_pendingVal");
-        Updates.reloadFromCache();
+        Updates.reload();
         navigate('Home');
     }
 
@@ -66,7 +95,7 @@ export default class Login extends React.Component{
                     <View style={{flex: 1,  justifyContent: "center", alignItems: "center",}}>
                         <Text style={{color:"white",fontWeight:"bold",fontSize:32}}>Logged In!</Text>
                         <View style={{height: 15}}/>
-                        <Text style={{color:"white",}}>Logged in as {userStore.user}.</Text>
+                        <Text style={{color:"white",}}>Logged in as {userStore.username}.</Text>
                     </View>
                     <View style={{flex: 1,  justifyContent: "center", alignItems: "center",}}>
                         <Button

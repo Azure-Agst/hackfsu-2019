@@ -10,6 +10,7 @@ const enableTestAccount = true
 const {height, width} = Dimensions.get('window')
 
 export default class Signup extends React.Component{
+    // fsucoin-api.azureagst.dev/signup
     static navigationOptions = {
         title: 'Signup',
         headerStyle: {backgroundColor: "#CEB888"}
@@ -17,7 +18,8 @@ export default class Signup extends React.Component{
 
     state = {
         user: "",
-        pass: ""
+        pass: "",
+        name: ""
     }
 
     handleChange(varia, value) {
@@ -25,12 +27,33 @@ export default class Signup extends React.Component{
             this.setState({user: value})
         } else if (varia == 'pass') {
             this.setState({pass: value})
+        } if (varia == 'name') {
+            this.setState({name: value})
         }
     }
 
-    handleSubmit(){
-        // TODO: post request
-        alert(`User: ${this.state.user}\nPassword: ${this.state.pass}`)
+    handleSubmit() {
+        const { navigate } = this.props.navigation;
+        let formdata = new FormData();
+        formdata.append("username", this.state.user)
+        formdata.append("password", this.state.pass)
+        formdata.append("name", this.state.name)
+        fetch('http://fsucoin-api.azureagst.dev/signup', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+            },
+            body: formdata
+        })
+        .then((response) => {
+            SecureStore.setItemAsync('FSUCoin_cookie', response.headers.get("set-cookie"))
+            return response.json()
+        })
+        .then((responseJson) => {
+            SecureStore.setItemAsync('FSUCoin_userData', JSON.stringify(responseJson));
+            Updates.reloadFromCache();
+            navigate('Home')
+        })
     }
 
     async testLogin(){
@@ -55,6 +78,11 @@ export default class Signup extends React.Component{
                     <View style={{height: 15}}/>
                 </View>
                 <View style={{flex: 2}}>
+                    <TextInput 
+                        style={{backgroundColor:"#ffffff", width: width*0.9, height: 50, marginBottom:25}}
+                        placeholder="Name"
+                        onChangeText={text => this.handleChange("name", text)}
+                    />
                     <TextInput 
                         style={{backgroundColor:"#ffffff", width: width*0.9, height: 50, marginBottom:25}}
                         placeholder="Username"

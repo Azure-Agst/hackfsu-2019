@@ -30,6 +30,7 @@ export class Recieve extends React.Component {
     render() {
     const { goBack } = this.props.navigation;
     const { addr } = this.props.navigation.state.params;
+    console.log(addr)
         return(
             // Hack to not wrap in another view
             <View style={{flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: bkgColor, }}>
