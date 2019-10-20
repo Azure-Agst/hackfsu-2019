@@ -76,7 +76,7 @@ ssh-import-id==5.7
 systemd-python==234
 tinydb==3.15.0
 toolz==0.10.0
-Twisted==17.9.0
+Twisted==19.7.0
 ufw==0.36
 unattended-upgrades==0.1
 urllib3==1.25.6
