@@ -6,6 +6,7 @@ import { requireNativeViewManager } from '@unimodules/core';
 const exampleName = "Andrew Augustine"
 const exampleFSUID = "aea19h"
 const exampleAddress = '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7'
+const exampleValue = 1500
 
 export class Home extends React.Component {
     static navigationOptions = {
@@ -24,7 +25,7 @@ export class Home extends React.Component {
                     <Text style={styles.name}>{exampleName}</Text>
                     <Text style={styles.fsuid}>FSUID: {exampleFSUID}</Text>
                     <Text style={styles.spacer} />
-                    <Text style={styles.address}>{exampleAddress}</Text>
+                    <Text style={styles.address}>{exampleValue} Points</Text>
                 </View>
                 <View style={styles.transfer}>
                     <View style={styles.transButton}>
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     },
     address: {
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 32,
         color: "#fff"
     },
     container: {

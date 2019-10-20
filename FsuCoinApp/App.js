@@ -1,45 +1,70 @@
 import React from 'react';
-import { Dimensions, YellowBox } from 'react-native';
+import { StyleSheet, Dimensions, ScrollView, Image, View } from 'react-native';
 import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { createDrawerNavigator, DrawerNavigatorItems } from 'react-navigation-drawer';
+import SafeAreaView from 'react-native-safe-area-view';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
 // supress yellow because fuck it, we don't have time
 console.disableYellowBox = true;
 
-// import views
-import { Home } from './views/home/index.js';
-import { Send } from './views/send.js';
-import { Scan } from './views/scan.js';
-import { Recieve } from './views/recieve.js';
-import { ConfirmTrans } from './views/confirm.js';
+// Imports
+import TransStack from './views/transact.js'
+import UserStack from './views/user.js'
 
 // Get screen width
 const {width} = Dimensions.get('window')
 
 // Main Drawer Nav
-const RootDrawer = createStackNavigator({
-  Home: {
-    screen: Home,
+const RootDrawer = createDrawerNavigator({
+  Wallet: {
+    screen: TransStack,
+    navigationOptions: {
+      drawerIcon: ({tintColor}) => (
+        <Icon name="wallet" style={{fontSize:24, color:tintColor }} />
+      )
+    }
   },
-  Scan: {
-    screen: Scan,
+  Account: {
+    screen: UserStack,
+    navigationOptions: {
+      drawerIcon: ({tintColor}) => (
+        <Icon name="users-cog" style={{fontSize:24, color:tintColor }} />
+      )
+    }
   },
-  Send: {
-    screen: Send,
-  },
-  Confirm: {
-    screen: ConfirmTrans,
-  },
-  Recieve: {
-    screen: Recieve,
-  }
 }, {
-  mode: "card",
-  headerMode: "float",
-  headerLayoutPreset: "left",
-  headerTransitionPreset: "fade-in-place",
-  headerTintColor: "#CEB888"
+  contentComponent: (props) => (
+    <SafeAreaView>
+      <ScrollView
+        forceInset={{ top: 'always', horizontal: 'never' }}
+      > 
+        <View style={styles.logoContainer}>
+          <Image style={styles.logo} source={require('./assets/icon.png')} />
+        </View>
+        <DrawerNavigatorItems {...props} />
+      </ScrollView>
+    </SafeAreaView>
+   ),
+  drawerWidth: width/2,
+  drawerBackgroundColor: "#CEB888",
+  contentOptions: {
+    activeTintColor: '#782F40',
+  }
 })
+
+const styles = StyleSheet.create({
+  logoContainer: {
+    marginTop: 20,
+    justifyContent: "center", 
+    alignItems: "center",
+  },
+  logo: {
+    flex: 1,
+    width: width/2.5,
+    height: width/2.5,
+  },
+});
 
 // Main app container
 const AppContainer = createAppContainer(RootDrawer);
