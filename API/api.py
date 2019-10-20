@@ -29,7 +29,7 @@ class NoleAPI:
         else:
             return False
     
-    def transferFrom(self, addresss, address2, value):
+    def transferFrom(self, address, address2, value):
         if not self.conn.isLock() and self.conn.isRunning():
             self.conn.call(net.contract_address, 'transferFrom', address, address2, value)
             return True

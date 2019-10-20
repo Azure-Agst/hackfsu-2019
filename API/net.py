@@ -18,7 +18,7 @@ from eth_account import Account
 keypath = '/home/Development/.ethereum/rinkeby/keystore/2019-10-20 04:37:11.809546'
 netIds = {'main':1,'morden':2,'ropsten':3,'rinkeby':4,'kovan':42,'sokol':77,'core':99} 
 solpath = '/home/Development/hackfsu-2019/API/'
-contract_address = '0x4974Ce7F7534BdaA070257D1fbd4634f6Cb86829'
+contract_address = '0xf43663133d7B9c1c7a65fe5E5Fda9975eB6A2854'
 
 class NoleCon():
     '''
@@ -270,7 +270,7 @@ class NoleCon():
 #print("Contract Address: " + address)
 #print(con.getTokenBalance('0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C'))
 
-#con.call(contract_address, 'mint', '0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 20)
+#con.call(contract_address, 'transferFrom', con.address, '0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 300)
 
 #con.send('0xBB938F2a95e2a4490cbc2Bab402f3939B6AcCc0C', 0.1)
 #print(con.getBalance('0x4903B22e7c28D370d09917cCE6e769009dCeD0F4'))
